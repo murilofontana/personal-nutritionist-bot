@@ -11,7 +11,7 @@ Você manda uma mensagem descrevendo o que comeu — "frango com batata e salada
 3. Salva o registro no banco local (SQLite)
 4. Responde com o resumo da refeição e o quanto ainda resta para comer no dia
 
-Além do registro de refeições, há comandos para consultar o resumo do dia, ver o histórico da semana, registrar treinos, atualizar o peso e editar metas.
+Além do registro de refeições, há comandos para consultar o resumo do dia, ver o histórico da semana, registrar treinos, atualizar o peso, editar metas e consultar se pode comer algo sem registrar.
 
 ## Comandos disponíveis
 
@@ -24,6 +24,7 @@ Além do registro de refeições, há comandos para consultar o resumo do dia, v
 | `/exercicio` | Registra treino (+250 kcal na meta do dia) |
 | `/peso 94.5` | Atualiza o peso e salva no histórico |
 | `/dieta` | Edita metas numéricas ou o texto da dieta |
+| `/posso` | Consulta se pode comer algo (sem registrar) |
 | `/dia` | Zera todos os registros do dia atual |
 
 ## Pré-requisitos

@@ -20,16 +20,7 @@ async function possoConversation(
   q: Queries,
   llm: LLMProvider,
 ): Promise<void> {
-  await ctx.reply(
-    '🤔 <b>O que você quer comer?</b>\n<i>Ex: pipoca, pipoca 50g, uma fatia de pizza</i>',
-    { parse_mode: 'HTML' }
-  );
-
-  // Wait for a text message only. If user sends non-text, abort silently.
-  const input = await conversation.waitFor('message');
-  if (!input.message.text) return;
-  const foodText = input.message.text.trim();
-
+  // Guard: diet plan must exist
   const dietPlan = q.getDietPlan();
   if (!dietPlan) {
     await ctx.reply(
@@ -50,6 +41,19 @@ async function possoConversation(
     );
     return;
   }
+
+  await ctx.reply(
+    '🤔 <b>O que você quer comer?</b>\n<i>Ex: pipoca, pipoca 50g, uma fatia de pizza</i>',
+    { parse_mode: 'HTML' }
+  );
+
+  // Wait for a text message only. If user sends non-text, inform and abort.
+  const input = await conversation.waitFor('message');
+  if (!input.message.text) {
+    await input.reply('Por favor, envie uma mensagem de texto.', { parse_mode: 'HTML' });
+    return;
+  }
+  const foodText = input.message.text.trim();
 
   const today     = new Date().toISOString().slice(0, 10);
   const totals    = q.getDailyTotals(today);

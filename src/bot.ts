@@ -14,7 +14,7 @@ import { createPesoCommand }                           from './commands/peso';
 import { createHojeCommand }                           from './commands/hoje';
 import { createSemanaCommand }                         from './commands/semana';
 import { createDietaConversation, createDietaCommand } from './commands/dieta';
-import { createPossoConversation, createPossoCommand }   from './commands/posso';
+import { createPossoConversation, createPossoCommand } from './commands/posso';
 import { createMealHandler }                           from './handlers/meal';
 
 import type { BotContext, SessionData } from './types';

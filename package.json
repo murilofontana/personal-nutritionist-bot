@@ -1,10 +1,7 @@
 {
-  "name": "nutricionista",
+  "name": "personal-nutritionist-bot",
   "version": "1.0.0",
   "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "start": "node src/bot.js",
     "test": "jest --forceExit"
@@ -13,9 +10,9 @@
     "testEnvironment": "node"
   },
   "keywords": [],
-  "author": "",
+  "author": ">[SEU NOME] Fontana",
   "license": "ISC",
-  "description": "",
+  "description": "Personal Telegram bot for tracking daily calorie and macro intake using a pluggable LLM",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@grammyjs/conversations": "^2.1.1",

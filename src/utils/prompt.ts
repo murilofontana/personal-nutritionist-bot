@@ -15,8 +15,24 @@ O formato obrigatório é exatamente este:
 Não inclua markdown, explicações ou qualquer texto fora do objeto JSON.
 `;
 
+const POSSO_JSON_INSTRUCTION = `
+IMPORTANTE: Responda SEMPRE com um objeto JSON válido, sem nenhum texto antes ou depois.
+Esta é uma consulta (não registrar como refeição). O formato obrigatório é exatamente este:
+{
+  "pode_comer": "sim" | "sim_com_ressalva" | "nao",
+  "porcao_sugerida": "<string — ex: 30g (~120 kcal)>",
+  "por_que": "<string — máx 150 chars — razão da decisão considerando o saldo do dia>",
+  "impacto_nos_macros": "<string — ex: consumiria ~20g carbo dos 15g restantes>"
+}
+Não inclua markdown, explicações ou qualquer texto fora do objeto JSON.
+`;
+
 export function buildSystemPrompt(dietPlanContent: string): string {
   return `${dietPlanContent}\n\n---\n${JSON_INSTRUCTION}`;
+}
+
+export function buildPossoSystemPrompt(dietPlanContent: string): string {
+  return `${dietPlanContent}\n\n---\n${POSSO_JSON_INSTRUCTION}`;
 }
 
 export function buildUserContext(

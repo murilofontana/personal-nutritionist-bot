@@ -13,6 +13,13 @@ export interface LLMResult {
   recomendacao: string;
 }
 
+export interface PossoResponse {
+  pode_comer: 'sim' | 'sim_com_ressalva' | 'nao';
+  porcao_sugerida: string;    // e.g. "30g (~120 kcal)"
+  por_que: string;            // reason for the verdict (hint: max ~150 chars)
+  impacto_nos_macros: string; // e.g. "consumiria ~20g carbo dos 15g restantes"
+}
+
 export interface LLMProvider {
   chat(params: {
     systemPrompt: string;

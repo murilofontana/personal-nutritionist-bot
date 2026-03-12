@@ -1,0 +1,30 @@
+{
+  "name": "nutricionista",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node src/bot.js",
+    "test": "jest --forceExit"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@grammyjs/conversations": "^2.1.1",
+    "better-sqlite3": "^12.6.2",
+    "dotenv": "^17.3.1",
+    "grammy": "^1.41.1",
+    "openai": "^6.27.0"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0"
+  }
+}

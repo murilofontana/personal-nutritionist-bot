@@ -14,6 +14,7 @@ import { createPesoCommand }                           from './commands/peso';
 import { createHojeCommand }                           from './commands/hoje';
 import { createSemanaCommand }                         from './commands/semana';
 import { createDietaConversation, createDietaCommand } from './commands/dieta';
+import { createPossoConversation, createPossoCommand }   from './commands/posso';
 import { createMealHandler }                           from './handlers/meal';
 
 import type { BotContext, SessionData } from './types';
@@ -60,6 +61,7 @@ bot.use(async (ctx, next) => {
 bot.use(session<SessionData, BotContext>({ initial: () => ({} as SessionData) }));
 bot.use(conversations<BotContext, BotContext>());
 bot.use(createConversation<BotContext, BotContext>(createDietaConversation(q), 'dieta'));
+bot.use(createConversation<BotContext, BotContext>(createPossoConversation(q, llm), 'posso'));
 
 // --- Commands ---
 bot.command('dia',       createDiaCommand(q));
@@ -69,6 +71,7 @@ bot.command('peso',      createPesoCommand(q));
 bot.command('hoje',      createHojeCommand(q));
 bot.command('semana',    createSemanaCommand(q));
 bot.command('dieta',     createDietaCommand());
+bot.command('posso',     createPossoCommand());
 
 bot.command('start', async (ctx) => {
   await ctx.reply(
@@ -84,6 +87,7 @@ bot.command('start', async (ctx) => {
       '/exercicio — registrar treino (+250 kcal na meta)',
       '/peso 94.5 — atualizar peso',
       '/dieta — editar metas ou dieta padrão',
+      '/posso — consultar se pode comer algo',
       '/dia — zerar registros do dia',
     ].join('\n'),
     { parse_mode: 'HTML' }

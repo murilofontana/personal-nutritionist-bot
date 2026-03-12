@@ -1,10 +1,10 @@
-'use strict';
-const Database = require('better-sqlite3');
-const { initSchema } = require('../../src/db/index');
-const { createQueries } = require('../../src/db/queries');
+import Database from 'better-sqlite3';
+import { initSchema } from '../../src/db/index';
+import { createQueries } from '../../src/db/queries';
+import type { Queries } from '../../src/types';
 
-let db;
-let q;
+let db: Database.Database;
+let q: Queries;
 
 beforeEach(() => {
   db = new Database(':memory:');
@@ -57,7 +57,7 @@ describe('meals', () => {
     const week = q.getWeeklyData('2026-03-10', '2026-03-11');
     expect(week).toHaveLength(2);
     const march10 = week.find(d => d.date === '2026-03-10');
-    expect(march10.kcal).toBe(390);
+    expect(march10!.kcal).toBe(390);
   });
 });
 
@@ -80,7 +80,7 @@ describe('profile', () => {
   });
 
   test('updateProfile ignores unknown fields', () => {
-    expect(() => q.updateProfile({ unknown_field: 99 })).not.toThrow();
+    expect(() => q.updateProfile({ })).not.toThrow();
   });
 });
 

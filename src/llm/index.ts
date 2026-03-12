@@ -1,9 +1,17 @@
-'use strict';
-const { createGroqProvider }   = require('./groq');
-const { createOpenAIProvider } = require('./openai');
-const { createGeminiProvider } = require('./gemini');
+import { createGroqProvider }   from './groq';
+import { createOpenAIProvider } from './openai';
+import { createGeminiProvider } from './gemini';
+import type { LLMProvider } from '../types';
 
-function createLLMProvider({ provider, apiKey, model }) {
+export function createLLMProvider({
+  provider,
+  apiKey,
+  model,
+}: {
+  provider: string;
+  apiKey: string;
+  model?: string;
+}): LLMProvider {
   switch (provider) {
     case 'groq':
       return createGroqProvider({ apiKey, model });
@@ -17,5 +25,3 @@ function createLLMProvider({ provider, apiKey, model }) {
       );
   }
 }
-
-module.exports = { createLLMProvider };

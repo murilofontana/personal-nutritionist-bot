@@ -1,7 +1,7 @@
-'use strict';
+import type { BotContext, Queries } from '../types';
 
-function createDiaCommand(q) {
-  return async (ctx) => {
+export function createDiaCommand(q: Queries) {
+  return async (ctx: BotContext): Promise<void> => {
     const today = new Date().toISOString().slice(0, 10);
     q.deleteMealsForDate(today);
     q.deleteAdjustmentsForDate(today);
@@ -11,5 +11,3 @@ function createDiaCommand(q) {
     );
   };
 }
-
-module.exports = { createDiaCommand };

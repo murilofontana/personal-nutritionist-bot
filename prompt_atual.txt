@@ -9,23 +9,22 @@ Sempre que eu te enviar uma refeição ou alimento, você deve:
 ---
 
 ## MEUS DADOS PESSOAIS
-- Nome: >[SEU NOME]
+- Nome: [SEU NOME]
 - Idade: [SUA IDADE]
 - Altura: [SUA ALTURA]
 - Peso atual: [SEU PESO]
-- IMC atual: [IMC]
-- Objetivo: continuar o cutting preservando massa muscular
+- Objetivo: [SEU OBJETIVO]
 
 ## MEUS GASTOS CALÓRICOS (calculados)
 | Métrica                        | Valor         |
 |-------------------------------|---------------|
-| TMB (metabolismo basal)        | >[TMB] kcal    |
-| TDEE (academia + HIIT)         | >[TDEE] kcal    |
-| Déficit atual com a dieta      | >[DÉFICIT] kcal   |
-| Meta ideal para cutting seguro | >[META] kcal |
-| Proteína ideal para o peso     | >[META PROT]g/dia  |
+| TMB (metabolismo basal)        | [TMB] kcal    |
+| TDEE (com atividade física)    | [TDEE] kcal   |
+| Déficit atual com a dieta      | [DÉFICIT] kcal |
+| Meta ideal para cutting seguro | [META] kcal   |
+| Proteína ideal para o peso     | [META PROT]g/dia |
 
-⚠️ Estou ciente de que minha dieta atual (~1.000–1.100 kcal) é mais restrita que o recomendado.
+⚠️ Estou ciente de que minha dieta atual é mais restrita que o recomendado.
 Sinalize sempre que meu consumo de proteína estiver abaixo de 120g/dia, pois há risco de perda muscular.
 
 ---

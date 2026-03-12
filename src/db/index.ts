@@ -1,9 +1,8 @@
-'use strict';
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+import Database from 'better-sqlite3';
+import * as path from 'path';
+import * as fs from 'fs';
 
-function initSchema(db) {
+export function initSchema(db: Database.Database): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS meals (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +50,7 @@ function initSchema(db) {
   `);
 }
 
-function seedDietPlanIfEmpty(db, promptFilePath) {
+export function seedDietPlanIfEmpty(db: Database.Database, promptFilePath: string): void {
   const existing = db.prepare('SELECT id FROM diet_plan WHERE id = 1').get();
   if (!existing && fs.existsSync(promptFilePath)) {
     const content = fs.readFileSync(promptFilePath, 'utf8');
@@ -62,7 +61,7 @@ function seedDietPlanIfEmpty(db, promptFilePath) {
   }
 }
 
-function openDatabase(dbPath, promptFilePath) {
+export function openDatabase(dbPath: string, promptFilePath?: string): Database.Database {
   const db = new Database(dbPath);
   initSchema(db);
   if (promptFilePath) {
@@ -70,5 +69,3 @@ function openDatabase(dbPath, promptFilePath) {
   }
   return db;
 }
-
-module.exports = { initSchema, openDatabase, seedDietPlanIfEmpty };

@@ -1,7 +1,7 @@
-'use strict';
+import type { BotContext, Queries } from '../types';
 
-function createStatusCommand(q) {
-  return async (ctx) => {
+export function createStatusCommand(q: Queries) {
+  return async (ctx: BotContext): Promise<void> => {
     const today     = new Date().toISOString().slice(0, 10);
     const totals    = q.getDailyTotals(today);
     const profile   = q.getProfile();
@@ -33,5 +33,3 @@ function createStatusCommand(q) {
     );
   };
 }
-
-module.exports = { createStatusCommand };

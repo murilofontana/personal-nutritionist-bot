@@ -1,27 +1,38 @@
-'use strict';
-const OpenAI = require('openai');
+import OpenAI from 'openai';
+import type { LLMProvider, LLMResult } from '../types';
 
 const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
 
-function createGroqProvider({ apiKey, model }) {
+export function createGroqProvider({ apiKey, model }: { apiKey: string; model?: string }): LLMProvider {
   const client = new OpenAI({
     apiKey,
     baseURL: 'https://api.groq.com/openai/v1',
   });
 
-  async function callAPI(messages, temperature = 0.2) {
+  async function callAPI(
+    messages: OpenAI.Chat.ChatCompletionMessageParam[],
+    temperature = 0.2,
+  ): Promise<LLMResult> {
     const response = await client.chat.completions.create({
       model: model || DEFAULT_MODEL,
       messages,
       temperature,
     });
-    const text = response.choices[0].message.content.trim();
-    return JSON.parse(text);
+    const text = response.choices[0].message.content!.trim();
+    return JSON.parse(text) as LLMResult;
   }
 
-  async function chat({ systemPrompt, userContext, userMessage }) {
+  async function chat({
+    systemPrompt,
+    userContext,
+    userMessage,
+  }: {
+    systemPrompt: string;
+    userContext: string;
+    userMessage: string;
+  }): Promise<LLMResult> {
     const userContent = `${userContext}\n\nRefeição relatada: ${userMessage}`;
-    const messages = [
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userContent },
     ];
@@ -39,5 +50,3 @@ function createGroqProvider({ apiKey, model }) {
 
   return { chat };
 }
-
-module.exports = { createGroqProvider };

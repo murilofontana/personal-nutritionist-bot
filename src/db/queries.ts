@@ -1,20 +1,27 @@
-'use strict';
+import Database from 'better-sqlite3';
+import type {
+  Queries,
+  Meal,
+  DailyTotals,
+  WeeklyDataRow,
+  Profile,
+  ProfileUpdateFields,
+  WeightRecord,
+} from '../types';
 
-function createQueries(db) {
+export function createQueries(db: Database.Database): Queries {
   return {
     // --- Meals ---
     insertMeal(date, time, description, kcal, prot, carbo, fat) {
-      return db
-        .prepare(
-          'INSERT INTO meals (date, time, description, kcal, prot, carbo, fat) VALUES (?, ?, ?, ?, ?, ?, ?)'
-        )
-        .run(date, time, description, kcal, prot, carbo, fat);
+      db.prepare(
+        'INSERT INTO meals (date, time, description, kcal, prot, carbo, fat) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      ).run(date, time, description, kcal, prot, carbo, fat);
     },
 
     getMealsForDate(date) {
       return db
         .prepare('SELECT * FROM meals WHERE date = ? ORDER BY time ASC')
-        .all(date);
+        .all(date) as Meal[];
     },
 
     deleteMealsForDate(date) {
@@ -31,7 +38,7 @@ function createQueries(db) {
             COALESCE(SUM(fat),0)   AS fat
           FROM meals WHERE date = ?`
         )
-        .get(date);
+        .get(date) as DailyTotals;
     },
 
     getWeeklyData(startDate, endDate) {
@@ -48,17 +55,21 @@ function createQueries(db) {
           GROUP BY date
           ORDER BY date ASC`
         )
-        .all(startDate, endDate);
+        .all(startDate, endDate) as WeeklyDataRow[];
     },
 
     // --- Profile ---
     getProfile() {
-      return db.prepare('SELECT * FROM profile WHERE id = 1').get();
+      return db.prepare('SELECT * FROM profile WHERE id = 1').get() as Profile;
     },
 
-    updateProfile(fields) {
-      const allowed = ['weight', 'target_kcal', 'target_prot', 'target_carbo', 'target_fat'];
-      const keys = Object.keys(fields).filter(k => allowed.includes(k));
+    updateProfile(fields: ProfileUpdateFields) {
+      const allowed: (keyof ProfileUpdateFields)[] = [
+        'weight', 'target_kcal', 'target_prot', 'target_carbo', 'target_fat',
+      ];
+      const keys = (Object.keys(fields) as (keyof ProfileUpdateFields)[]).filter(k =>
+        allowed.includes(k)
+      );
       if (keys.length === 0) return;
       const sets = keys.map(k => `${k} = ?`).join(', ');
       const values = keys.map(k => fields[k]);
@@ -69,7 +80,9 @@ function createQueries(db) {
 
     // --- Diet plan ---
     getDietPlan() {
-      const row = db.prepare('SELECT content FROM diet_plan WHERE id = 1').get();
+      const row = db.prepare('SELECT content FROM diet_plan WHERE id = 1').get() as
+        | { content: string }
+        | undefined;
       return row ? row.content : null;
     },
 
@@ -91,7 +104,7 @@ function createQueries(db) {
         .prepare(
           'SELECT COALESCE(SUM(extra_kcal),0) AS total FROM day_adjustments WHERE date = ?'
         )
-        .get(date);
+        .get(date) as { total: number };
       return row.total;
     },
 
@@ -111,9 +124,7 @@ function createQueries(db) {
         .prepare(
           'SELECT weight, date FROM weight_history WHERE date >= ? AND date <= ? ORDER BY date ASC'
         )
-        .all(startDate, endDate);
+        .all(startDate, endDate) as WeightRecord[];
     },
   };
 }
-
-module.exports = { createQueries };

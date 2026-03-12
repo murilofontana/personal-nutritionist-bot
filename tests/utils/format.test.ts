@@ -1,10 +1,4 @@
-'use strict';
-const {
-  asciiBar,
-  formatMealResponse,
-  formatDailyStatus,
-  formatWeeklySummary,
-} = require('../../src/utils/format');
+import { asciiBar, formatMealResponse, formatDailyStatus, formatWeeklySummary } from '../../src/utils/format';
 
 describe('asciiBar', () => {
   test('full bar when current >= target', () => {
@@ -31,25 +25,23 @@ describe('asciiBar', () => {
 describe('formatMealResponse', () => {
   const meal = { kcal: 390, prot: 37, carbo: 32, fat: 11 };
   const llmResult = {
-    dentro_da_dieta: 'sim',
+    kcal: 390, prot: 37, carbo: 32, fat: 11,
+    dentro_da_dieta: 'sim' as const,
     avaliacao: 'Dentro da meta.',
     recomendacao: 'Lanche A à tarde + jantar padrão.',
   };
   const remaining = { kcal: 710, prot: 58, carbo: 58, fat: 24 };
 
   test('contains meal kcal', () => {
-    const out = formatMealResponse('frango + batata', meal, llmResult, remaining);
-    expect(out).toContain('390');
+    expect(formatMealResponse('frango + batata', meal, llmResult, remaining)).toContain('390');
   });
 
   test('contains recommendation text', () => {
-    const out = formatMealResponse('frango + batata', meal, llmResult, remaining);
-    expect(out).toContain('Lanche A à tarde');
+    expect(formatMealResponse('frango + batata', meal, llmResult, remaining)).toContain('Lanche A à tarde');
   });
 
   test('contains remaining kcal', () => {
-    const out = formatMealResponse('frango + batata', meal, llmResult, remaining);
-    expect(out).toContain('710');
+    expect(formatMealResponse('frango + batata', meal, llmResult, remaining)).toContain('710');
   });
 
   test('shows warning emoji for sim_com_ressalva', () => {
@@ -59,16 +51,15 @@ describe('formatMealResponse', () => {
 });
 
 describe('formatDailyStatus', () => {
-  const totals = { kcal: 605, prot: 63, carbo: 57, fat: 13 };
+  const totals  = { kcal: 605, prot: 63, carbo: 57, fat: 13 };
   const profile = { target_kcal: 1100, target_prot: 95, target_carbo: 90, target_fat: 35 };
-  const meals = [
+  const meals   = [
     { time: '12:00', description: 'frango + batata', kcal: 390 },
-    { time: '16:00', description: 'lanche whey', kcal: 215 },
+    { time: '16:00', description: 'lanche whey',    kcal: 215 },
   ];
 
   test('contains total kcal consumed', () => {
-    const out = formatDailyStatus(totals, profile, 0, meals);
-    expect(out).toContain('605');
+    expect(formatDailyStatus(totals, profile, 0, meals)).toContain('605');
   });
 
   test('contains meal descriptions', () => {
@@ -78,39 +69,34 @@ describe('formatDailyStatus', () => {
   });
 
   test('contains ASCII progress bars', () => {
-    const out = formatDailyStatus(totals, profile, 0, meals);
-    expect(out).toMatch(/[█░]+/);
+    expect(formatDailyStatus(totals, profile, 0, meals)).toMatch(/[█░]+/);
   });
 
   test('renders low protein alert when total prot < 120g', () => {
     const lowProtTotals = { kcal: 900, prot: 85, carbo: 80, fat: 30 };
-    const out = formatDailyStatus(lowProtTotals, profile, 0, meals);
-    expect(out).toContain('120g');
+    expect(formatDailyStatus(lowProtTotals, profile, 0, meals)).toContain('120g');
   });
 
   test('accounts for extra kcal from exercise in effective target', () => {
-    const out = formatDailyStatus(totals, profile, 250, meals);
-    expect(out).toContain('1350'); // 1100 + 250
+    expect(formatDailyStatus(totals, profile, 250, meals)).toContain('1350');
   });
 });
 
 describe('formatWeeklySummary', () => {
   const weekData = [
     { date: '2026-03-06', kcal: 1082, prot: 90, carbo: 88, fat: 30 },
-    { date: '2026-03-07', kcal: 890, prot: 70, carbo: 80, fat: 25 },
+    { date: '2026-03-07', kcal: 890,  prot: 70, carbo: 80, fat: 25 },
   ];
   const profile = { target_kcal: 1100, target_prot: 95, target_carbo: 90, target_fat: 35 };
-  const weightHistory = [];
 
   test('contains kcal for each day', () => {
-    const out = formatWeeklySummary(weekData, profile, weightHistory);
+    const out = formatWeeklySummary(weekData, profile, []);
     expect(out).toContain('1082');
     expect(out).toContain('890');
   });
 
   test('contains average kcal rounded correctly', () => {
-    const out = formatWeeklySummary(weekData, profile, weightHistory);
-    expect(out).toContain('986'); // Math.round((1082+890)/2)
+    expect(formatWeeklySummary(weekData, profile, [])).toContain('986');
   });
 
   test('shows weight trend when history available', () => {
@@ -121,7 +107,6 @@ describe('formatWeeklySummary', () => {
   });
 
   test('returns no-data message for empty weekData', () => {
-    const out = formatWeeklySummary([], profile, []);
-    expect(out).toContain('Sem dados');
+    expect(formatWeeklySummary([], profile, [])).toContain('Sem dados');
   });
 });

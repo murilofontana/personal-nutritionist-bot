@@ -1,5 +1,4 @@
-'use strict';
-const { buildSystemPrompt, buildUserContext } = require('../../src/utils/prompt');
+import { buildSystemPrompt, buildUserContext } from '../../src/utils/prompt';
 
 describe('buildSystemPrompt', () => {
   test('includes the diet plan content', () => {

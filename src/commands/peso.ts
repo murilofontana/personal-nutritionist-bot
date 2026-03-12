@@ -1,8 +1,8 @@
-'use strict';
+import type { BotContext, Queries } from '../types';
 
-function createPesoCommand(q) {
-  return async (ctx) => {
-    const text  = ctx.message.text.trim();
+export function createPesoCommand(q: Queries) {
+  return async (ctx: BotContext): Promise<void> => {
+    const text  = ctx.message!.text!.trim();
     const parts = text.split(/\s+/);
 
     if (parts.length < 2) {
@@ -38,5 +38,3 @@ function createPesoCommand(q) {
     );
   };
 }
-
-module.exports = { createPesoCommand };

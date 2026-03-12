@@ -1,25 +1,30 @@
-'use strict';
+import type { DailyTotals, LLMResult, Meal, Profile, Remaining, WeeklyDataRow, WeightRecord } from '../types';
 
 const PT_DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-function asciiBar(current, target, width = 10) {
+export function asciiBar(current: number, target: number, width = 10): string {
   const ratio = Math.min(current / target, 1);
   const filled = Math.floor(ratio * width);
   const empty = width - filled;
   return '█'.repeat(filled) + '░'.repeat(empty);
 }
 
-function statusEmoji(inside) {
+function statusEmoji(inside: LLMResult['dentro_da_dieta']): string {
   if (inside === 'sim') return '✅';
   if (inside === 'sim_com_ressalva') return '⚠️';
   return '❌';
 }
 
-function pad(str, len) {
+function pad(str: string | number, len: number): string {
   return String(str).padEnd(len, ' ');
 }
 
-function formatMealResponse(description, meal, llmResult, remaining) {
+export function formatMealResponse(
+  description: string,
+  meal: Pick<Meal, 'kcal' | 'prot' | 'carbo' | 'fat'>,
+  llmResult: LLMResult,
+  remaining: Remaining,
+): string {
   const { kcal, prot, carbo, fat } = meal;
   const emoji = statusEmoji(llmResult.dentro_da_dieta);
 
@@ -43,7 +48,12 @@ function formatMealResponse(description, meal, llmResult, remaining) {
   ].join('\n');
 }
 
-function formatDailyStatus(totals, profile, extraKcal, meals) {
+export function formatDailyStatus(
+  totals: DailyTotals,
+  profile: Pick<Profile, 'target_kcal' | 'target_prot' | 'target_carbo' | 'target_fat'>,
+  extraKcal: number,
+  meals: Pick<Meal, 'time' | 'description' | 'kcal'>[],
+): string {
   const effectiveKcal = profile.target_kcal + (extraKcal || 0);
 
   const now = new Date();
@@ -84,7 +94,11 @@ function formatDailyStatus(totals, profile, extraKcal, meals) {
   ].join('\n');
 }
 
-function formatWeeklySummary(weekData, profile, weightHistory) {
+export function formatWeeklySummary(
+  weekData: WeeklyDataRow[],
+  profile: Pick<Profile, 'target_kcal' | 'target_prot' | 'target_carbo' | 'target_fat'>,
+  weightHistory: WeightRecord[],
+): string {
   if (weekData.length === 0) {
     return '📅 <b>Sem dados para a semana.</b> Registre refeições para ver o resumo.';
   }
@@ -100,7 +114,8 @@ function formatWeeklySummary(weekData, profile, weightHistory) {
   });
 
   const complete = weekData.filter(d => d.kcal > 200);
-  const avg = arr => (complete.length > 0 ? Math.round(arr.reduce((s, d) => s + d, 0) / complete.length) : 0);
+  const avg = (arr: number[]): number =>
+    complete.length > 0 ? Math.round(arr.reduce((s, d) => s + d, 0) / complete.length) : 0;
 
   const avgKcal  = avg(complete.map(d => d.kcal));
   const avgProt  = avg(complete.map(d => d.prot));
@@ -108,7 +123,7 @@ function formatWeeklySummary(weekData, profile, weightHistory) {
   const avgFat   = avg(complete.map(d => d.fat));
 
   const daysOnTarget = complete.filter(
-    d => d.kcal >= profile.target_kcal * 0.85 && d.kcal <= profile.target_kcal * 1.15
+    d => d.kcal >= profile.target_kcal * 0.85 && d.kcal <= profile.target_kcal * 1.15,
   ).length;
 
   const daysLowProt = complete.filter(d => d.prot < 120).length;
@@ -119,7 +134,7 @@ function formatWeeklySummary(weekData, profile, weightHistory) {
     const first = weightHistory[0].weight;
     const last  = weightHistory[weightHistory.length - 1].weight;
     const diff  = (last - first).toFixed(1);
-    const sign  = diff > 0 ? '+' : '';
+    const sign  = Number(diff) > 0 ? '+' : '';
     weightLine = `\n⚖️ Peso: ${first}kg → ${last}kg (${sign}${diff}kg na semana)`;
   }
 
@@ -142,5 +157,3 @@ function formatWeeklySummary(weekData, profile, weightHistory) {
     weightLine,
   ].join('\n');
 }
-
-module.exports = { asciiBar, formatMealResponse, formatDailyStatus, formatWeeklySummary };

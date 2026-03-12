@@ -6,11 +6,14 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 COPY . .
+
+# Compile TypeScript → dist/
+RUN npm run build
 
 # data/ directory is mounted as volume — create it so it exists in image
 RUN mkdir -p /app/data
 
-CMD ["node", "src/bot.js"]
+CMD ["node", "dist/bot.js"]

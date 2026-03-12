@@ -1,9 +1,9 @@
-'use strict';
+import type { BotContext, Queries } from '../types';
 
 const EXERCISE_KCAL = 250;
 
-function createExercicioCommand(q) {
-  return async (ctx) => {
+export function createExercicioCommand(q: Queries) {
+  return async (ctx: BotContext): Promise<void> => {
     const today = new Date().toISOString().slice(0, 10);
     q.insertAdjustment(today, EXERCISE_KCAL);
 
@@ -23,5 +23,3 @@ function createExercicioCommand(q) {
     );
   };
 }
-
-module.exports = { createExercicioCommand };

@@ -1,7 +1,11 @@
-'use strict';
+import type { BotContext, BotConversation, Queries, ProfileUpdateFields } from '../types';
 
 // Conversation function — registered in bot.js via createConversation()
-async function dietaConversation(conversation, ctx, q) {
+async function dietaConversation(
+  conversation: BotConversation,
+  ctx: BotContext,
+  q: Queries,
+): Promise<void> {
   await ctx.reply(
     [
       '⚙️ <b>Editar dieta</b>',
@@ -32,17 +36,21 @@ async function dietaConversation(conversation, ctx, q) {
   }
 }
 
-async function editMetas(conversation, ctx, q) {
+async function editMetas(
+  conversation: BotConversation,
+  ctx: BotContext,
+  q: Queries,
+): Promise<void> {
   const profile = q.getProfile();
 
-  const fields = [
-    { key: 'target_kcal', label: 'Calorias', unit: 'kcal', current: profile.target_kcal },
-    { key: 'target_prot', label: 'Proteína', unit: 'g', current: profile.target_prot },
-    { key: 'target_carbo', label: 'Carboidrato', unit: 'g', current: profile.target_carbo },
-    { key: 'target_fat', label: 'Gordura', unit: 'g', current: profile.target_fat },
+  const fields: { key: keyof ProfileUpdateFields; label: string; unit: string; current: number }[] = [
+    { key: 'target_kcal',  label: 'Calorias',    unit: 'kcal', current: profile.target_kcal },
+    { key: 'target_prot',  label: 'Proteína',    unit: 'g',    current: profile.target_prot },
+    { key: 'target_carbo', label: 'Carboidrato', unit: 'g',    current: profile.target_carbo },
+    { key: 'target_fat',   label: 'Gordura',     unit: 'g',    current: profile.target_fat },
   ];
 
-  const updates = {};
+  const updates: ProfileUpdateFields = {};
 
   for (const field of fields) {
     await ctx.reply(
@@ -70,9 +78,9 @@ async function editMetas(conversation, ctx, q) {
 
   q.updateProfile(updates);
 
-  const lines = Object.entries(updates).map(([k, v]) => {
-    const f = fields.find(f => f.key === k);
-    return `• ${f.label}: ${v}${f.unit}`;
+  const lines = (Object.keys(updates) as (keyof ProfileUpdateFields)[]).map(k => {
+    const f = fields.find(f => f.key === k)!;
+    return `• ${f.label}: ${updates[k]}${f.unit}`;
   });
 
   await ctx.reply(
@@ -81,7 +89,11 @@ async function editMetas(conversation, ctx, q) {
   );
 }
 
-async function editDietaPlan(conversation, ctx, q) {
+async function editDietaPlan(
+  conversation: BotConversation,
+  ctx: BotContext,
+  q: Queries,
+): Promise<void> {
   await ctx.reply(
     [
       '📋 Cole abaixo o novo texto completo da sua dieta.',
@@ -108,15 +120,14 @@ async function editDietaPlan(conversation, ctx, q) {
   );
 }
 
-// Factory to create the conversation with access to q (injected via closure in bot.js)
-function createDietaConversation(q) {
-  return (conversation, ctx) => dietaConversation(conversation, ctx, q);
+// Factory to create the conversation with access to q (injected via closure in bot.ts)
+export function createDietaConversation(q: Queries) {
+  return (conversation: BotConversation, ctx: BotContext): Promise<void> =>
+    dietaConversation(conversation, ctx, q);
 }
 
-function createDietaCommand() {
-  return async (ctx) => {
+export function createDietaCommand() {
+  return async (ctx: BotContext): Promise<void> => {
     await ctx.conversation.enter('dieta');
   };
 }
-
-module.exports = { createDietaConversation, createDietaCommand };

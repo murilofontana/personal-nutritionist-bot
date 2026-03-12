@@ -1,4 +1,4 @@
-import { asciiBar, formatMealResponse, formatDailyStatus, formatWeeklySummary } from '../../src/utils/format';
+import { asciiBar, formatMealResponse, formatDailyStatus, formatWeeklySummary, formatPossoResponse } from '../../src/utils/format';
 
 describe('asciiBar', () => {
   test('full bar when current >= target', () => {
@@ -108,5 +108,38 @@ describe('formatWeeklySummary', () => {
 
   test('returns no-data message for empty weekData', () => {
     expect(formatWeeklySummary([], profile, [])).toContain('Sem dados');
+  });
+});
+
+describe('formatPossoResponse', () => {
+  const base: import('../../src/types').PossoResponse = {
+    pode_comer: 'sim',
+    porcao_sugerida: '30g (~120 kcal)',
+    por_que: 'Você ainda tem 15g de carbo disponíveis hoje.',
+    impacto_nos_macros: 'consumiria ~20g carbo dos 15g restantes',
+  };
+
+  test('contains checkmark emoji for sim', () => {
+    expect(formatPossoResponse(base)).toContain('✅');
+  });
+
+  test('contains warning emoji for sim_com_ressalva', () => {
+    expect(formatPossoResponse({ ...base, pode_comer: 'sim_com_ressalva' })).toContain('⚠️');
+  });
+
+  test('contains x emoji for nao', () => {
+    expect(formatPossoResponse({ ...base, pode_comer: 'nao' })).toContain('❌');
+  });
+
+  test('contains porcao_sugerida text', () => {
+    expect(formatPossoResponse(base)).toContain('30g (~120 kcal)');
+  });
+
+  test('contains por_que text', () => {
+    expect(formatPossoResponse(base)).toContain('15g de carbo disponíveis');
+  });
+
+  test('contains impacto_nos_macros text', () => {
+    expect(formatPossoResponse(base)).toContain('consumiria ~20g carbo');
   });
 });

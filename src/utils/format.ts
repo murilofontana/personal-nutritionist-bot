@@ -1,4 +1,4 @@
-import type { DailyTotals, LLMResult, Meal, Profile, Remaining, WeeklyDataRow, WeightRecord } from '../types';
+import type { DailyTotals, LLMResult, Meal, PossoResponse, Profile, Remaining, WeeklyDataRow, WeightRecord } from '../types';
 
 const PT_DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -155,5 +155,23 @@ export function formatWeeklySummary(
     `Dias dentro da meta: ${daysOnTarget} / ${complete.length}`,
     protAlert,
     weightLine,
+  ].join('\n');
+}
+
+function possoEmoji(pode: PossoResponse['pode_comer']): string {
+  if (pode === 'sim') return '✅ Pode comer!';
+  if (pode === 'sim_com_ressalva') return '⚠️ Com ressalva';
+  return '❌ Não recomendado';
+}
+
+export function formatPossoResponse(response: PossoResponse): string {
+  return [
+    possoEmoji(response.pode_comer),
+    ``,
+    `🍽 <b>Porção sugerida:</b> ${response.porcao_sugerida}`,
+    ``,
+    `💬 <b>Por quê:</b> ${response.por_que}`,
+    ``,
+    `📊 <b>Impacto nos macros:</b> ${response.impacto_nos_macros}`,
   ].join('\n');
 }

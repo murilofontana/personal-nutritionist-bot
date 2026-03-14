@@ -19,8 +19,15 @@ async function dietaConversation(
     { parse_mode: 'HTML' }
   );
 
-  const choice = await conversation.waitFor('message:text');
-  const choiceText = choice.message.text.trim();
+  let choiceText = (await conversation.waitFor('message:text')).message.text.trim();
+
+  while (!['1', '2', '/cancelar'].includes(choiceText)) {
+    await ctx.reply(
+      '❌ Opção inválida. Responda com <b>1</b>, <b>2</b> ou /cancelar:',
+      { parse_mode: 'HTML' },
+    );
+    choiceText = (await conversation.waitFor('message:text')).message.text.trim();
+  }
 
   if (choiceText === '/cancelar') {
     await ctx.reply('❌ Edição cancelada.');
@@ -29,10 +36,8 @@ async function dietaConversation(
 
   if (choiceText === '1') {
     await editMetas(conversation, ctx, q);
-  } else if (choiceText === '2') {
-    await editDietaPlan(conversation, ctx, q);
   } else {
-    await ctx.reply('❌ Opção inválida. Use /dieta para tentar novamente.');
+    await editDietaPlan(conversation, ctx, q);
   }
 }
 

@@ -1,5 +1,6 @@
 import { buildSystemPrompt, buildUserContext, buildImageContext } from '../utils/prompt';
 import { formatMealResponse } from '../utils/format';
+import { withTyping } from '../utils/typing';
 import type { BotContext, Queries, LLMProvider, Remaining } from '../types';
 
 export function createMealHandler(q: Queries, llm: LLMProvider, botToken?: string) {
@@ -63,12 +64,11 @@ export function createMealHandler(q: Queries, llm: LLMProvider, botToken?: strin
       userContext += '\n\n' + buildImageContext(userMessage);
     }
 
-    // Show typing indicator
-    await ctx.replyWithChatAction('typing');
-
     let llmResult;
     try {
-      llmResult = await llm.chat({ systemPrompt, userContext, userMessage, imageBase64, imageMimeType });
+      llmResult = await withTyping(ctx, () =>
+        llm.chat({ systemPrompt, userContext, userMessage, imageBase64, imageMimeType })
+      );
     } catch (err) {
       console.error('[meal handler] LLM error:', (err as Error).message);
       await ctx.reply(

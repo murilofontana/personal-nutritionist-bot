@@ -1,5 +1,6 @@
 import { buildPossoSystemPrompt, buildUserContext } from '../utils/prompt';
 import { formatPossoResponse } from '../utils/format';
+import { withTyping } from '../utils/typing';
 import type { BotContext, BotConversation, Queries, LLMProvider, PossoResponse } from '../types';
 
 function isValidPossoResponse(raw: unknown): raw is PossoResponse {
@@ -98,8 +99,6 @@ async function possoConversation(
   const userContext  = buildUserContext(totals, extraKcal, profile);
   const userMessage  = `Consulta (não registrar como refeição): ${foodText}`;
 
-  await ctx.replyWithChatAction('typing');
-
   // llm.chat() parses JSON internally and returns the object typed as LLMResult.
   // Because we supplied buildPossoSystemPrompt (different schema), we cast to unknown
   // and validate the actual runtime fields below.
@@ -114,7 +113,7 @@ async function possoConversation(
 
   let raw: unknown;
   try {
-    raw = await callLLM();
+    raw = await withTyping(ctx, () => callLLM());
   } catch (err) {
     console.error('[posso] LLM error:', (err as Error).message);
     await ctx.reply(

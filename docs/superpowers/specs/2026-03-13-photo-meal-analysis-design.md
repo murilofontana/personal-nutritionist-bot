@@ -103,7 +103,16 @@ When `imageBase64` is present, user message content becomes an array:
 
 ### 4. `src/llm/groq.ts`
 
-Same multimodal content structure as OpenAI. When `imageBase64` is present, override the model to `llama-3.2-11b-vision-preview` unless `LLM_MODEL` env var is already set to a custom value (user override takes precedence).
+Same multimodal content structure as OpenAI. When `imageBase64` is present, the model selection logic is:
+
+```ts
+const effectiveModel = model          // LLM_MODEL env var, if set by user
+  ?? (imageBase64                      // image present and no user override?
+       ? 'llama-3.2-11b-vision-preview'  // use vision model
+       : DEFAULT_MODEL);               // DEFAULT_MODEL = 'llama-3.3-70b-versatile'
+```
+
+In other words: only override to the vision model when `model` is `undefined` (i.e. `LLM_MODEL` was not set in `.env`). If the user explicitly set `LLM_MODEL`, that value always wins.
 
 ---
 
@@ -137,8 +146,8 @@ Decision flow:
 ```
 message received
 ├── message:photo
-│   ├── no caption → reply asking for caption, return
-│   ├── has caption
+│   ├── no caption (null, undefined, or empty string "") → reply asking for caption, return
+│   ├── has caption (non-empty string)
 │   │   ├── download largest PhotoSize via Telegram file API
 │   │   │   └── on failure → reply error, return
 │   │   ├── convert ArrayBuffer → base64
@@ -180,6 +189,9 @@ if (!hasText && !hasPhoto) {
 if (hasPhoto && !input.message.caption) {
   await input.reply('Foto recebida! Adicione uma legenda descrevendo quanto vai comer.');
   return;
+  // NOTE: intentionally returns and ends the conversation.
+  // The user must re-enter /posso to try again. Re-prompting within
+  // the conversation was not requested and would add flow complexity.
 }
 ```
 
@@ -247,9 +259,10 @@ formatMealResponse(llmResult.descricao, mealMacros, llmResult, remaining)
 - New unit tests cover:
   - `gemini.ts` with `imageBase64` present: verify multimodal parts structure
   - `openai.ts` with `imageBase64` present: verify image_url content block
-  - `meal.ts`: photo without caption returns early with prompt message
+  - `groq.ts` with `imageBase64` present: verify multimodal content block + vision model override logic
+  - `meal.ts`: photo without caption (including empty string) returns early with prompt message
   - `meal.ts`: photo with caption triggers image download + LLM call
-  - `posso.ts`: photo guard logic
+  - `posso.ts`: photo guard logic (no photo/no text, photo without caption, photo with caption)
 
 ---
 

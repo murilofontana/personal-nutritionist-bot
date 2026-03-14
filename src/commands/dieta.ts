@@ -59,14 +59,20 @@ async function editMetas(
 
   for (const field of fields) {
     await ctx.reply(
-      `${field.label} atual: <b>${field.current}${field.unit}</b>\nNovo valor (ou <i>pular</i> para manter):`,
+      `${field.label} atual: <b>${field.current}${field.unit}</b>\nNovo valor, <i>pular</i> para manter, ou /cancelar para sair:`,
       { parse_mode: 'HTML' }
     );
 
     const resp = await conversation.waitFor('message:text');
-    const text = resp.message.text.trim().toLowerCase();
+    const text = resp.message.text.trim();
 
-    if (text === 'pular' || text === '/pular') continue;
+    if (text === '/cancelar') {
+      await ctx.reply('❌ Edição cancelada.');
+      return;
+    }
+
+    const textLower = text.toLowerCase();
+    if (textLower === 'pular' || textLower === '/pular') continue;
 
     const val = parseFloat(text.replace(',', '.'));
     if (isNaN(val) || val <= 0) {

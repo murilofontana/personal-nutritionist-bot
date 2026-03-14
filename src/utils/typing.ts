@@ -21,7 +21,7 @@ export async function withTyping<T>(
   };
 
   // Fire-and-forget: loop runs concurrently with fn
-  loop();
+  void loop();
 
   try {
     return await fn();

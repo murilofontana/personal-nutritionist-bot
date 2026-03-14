@@ -58,17 +58,17 @@ async function possoConversation(
     await input.reply('Por favor, envie uma mensagem de texto ou uma foto.', { parse_mode: 'HTML' });
     return;
   }
+  let foodText: string;
   if (hasPhoto && !input.message.caption) {
     await input.reply(
-      'Foto recebida! Adicione uma legenda descrevendo quanto vai comer.',
+      'Foto recebida! Descreva quanto você vai comer (ex: 2 fatias, 100g):',
       { parse_mode: 'HTML' }
     );
-    return;
-    // NOTE: intentionally returns and ends the conversation.
-    // The user must re-enter /posso to try again.
+    const captionMsg = await conversation.waitFor('message:text');
+    foodText = captionMsg.message.text.trim();
+  } else {
+    foodText = hasPhoto ? input.message.caption!.trim() : input.message.text!.trim();
   }
-
-  const foodText = hasPhoto ? input.message.caption!.trim() : input.message.text!.trim();
 
   let imageBase64: string | undefined;
   let imageMimeType: string | undefined;

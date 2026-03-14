@@ -86,30 +86,57 @@ describe('posso conversation - photo guard logic', () => {
     expect(llm.chat).not.toHaveBeenCalled();
   });
 
-  test('photo without caption replies asking for caption and does not call LLM', async () => {
+  test('photo without caption: asks for caption then proceeds with follow-up text', async () => {
     const q = makeMockQueries();
     const llm = makeMockLLM();
     const possoHandler = createPossoConversation(q, llm, 'test-token');
 
     const ctx = makeCtx();
-    const input = {
+    const mockBuf = new ArrayBuffer(8);
+    global.fetch = jest.fn().mockResolvedValue({
+      arrayBuffer: jest.fn().mockResolvedValue(mockBuf),
+    }) as unknown as typeof fetch;
+
+    // First message: photo without caption
+    const photoInput = {
       message: {
         text: undefined,
-        photo: [{ file_id: 'f1', file_unique_id: 'u1', width: 800, height: 600 }],
+        photo: [{ file_id: 'f_large', file_unique_id: 'u1', width: 800, height: 600 }],
         caption: undefined,
       },
       reply: jest.fn().mockResolvedValue(undefined),
-      api: { getFile: jest.fn() },
+      api: {
+        getFile: jest.fn().mockResolvedValue({ file_path: 'photos/f_large.jpg' }),
+      },
     };
-    const conversation = { waitFor: jest.fn().mockResolvedValue(input) };
+
+    // Second message: text caption
+    const captionInput = {
+      message: { text: 'quero comer 100g disso' },
+    };
+
+    const conversation = {
+      waitFor: jest.fn()
+        .mockResolvedValueOnce(photoInput)  // first waitFor('message')
+        .mockResolvedValueOnce(captionInput), // second waitFor('message:text')
+    };
 
     await possoHandler(conversation as any, ctx as any);
 
-    expect(input.reply).toHaveBeenCalledWith(
-      expect.stringContaining('legenda'),
+    // Should have asked for a caption description
+    expect(photoInput.reply).toHaveBeenCalledWith(
+      expect.stringContaining('Descreva'),
       expect.any(Object)
     );
-    expect(llm.chat).not.toHaveBeenCalled();
+
+    // LLM should be called with the photo AND the caption text
+    expect(llm.chat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        imageBase64: expect.any(String),
+        imageMimeType: 'image/jpeg',
+        userMessage: expect.stringContaining('quero comer 100g disso'),
+      })
+    );
   });
 
   test('photo with caption downloads photo and calls LLM with imageBase64', async () => {

@@ -16,7 +16,7 @@ export async function withTyping<T>(
   const loop = async (): Promise<void> => {
     while (active) {
       void ctx.replyWithChatAction('typing');
-      await new Promise<void>(r => setTimeout(r, 4000));
+      await new Promise<void>(r => setTimeout(r, 4000).unref?.());
     }
   };
 

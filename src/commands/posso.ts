@@ -19,6 +19,7 @@ async function possoConversation(
   ctx: BotContext,
   q: Queries,
   llm: LLMProvider,
+  botToken?: string,
 ): Promise<void> {
   // Guard: diet plan must exist
   const dietPlan = q.getDietPlan();
@@ -47,13 +48,47 @@ async function possoConversation(
     { parse_mode: 'HTML' }
   );
 
-  // Wait for a text message only. If user sends non-text, inform and abort.
+  // Wait for a text or photo message. Reject anything else.
   const input = await conversation.waitFor('message');
-  if (!input.message.text) {
-    await input.reply('Por favor, envie uma mensagem de texto.', { parse_mode: 'HTML' });
+  const hasText  = !!input.message.text;
+  const hasPhoto = !!input.message.photo?.length;
+
+  if (!hasText && !hasPhoto) {
+    await input.reply('Por favor, envie uma mensagem de texto ou uma foto.', { parse_mode: 'HTML' });
     return;
   }
-  const foodText = input.message.text.trim();
+  if (hasPhoto && !input.message.caption) {
+    await input.reply(
+      'Foto recebida! Adicione uma legenda descrevendo quanto vai comer.',
+      { parse_mode: 'HTML' }
+    );
+    return;
+    // NOTE: intentionally returns and ends the conversation.
+    // The user must re-enter /posso to try again.
+  }
+
+  const foodText = hasPhoto ? input.message.caption!.trim() : input.message.text!.trim();
+
+  let imageBase64: string | undefined;
+  let imageMimeType: string | undefined;
+
+  if (hasPhoto) {
+    try {
+      const photo = input.message.photo![input.message.photo!.length - 1];
+      const file  = await input.api.getFile(photo.file_id);
+      const url   = `https://api.telegram.org/file/bot${botToken}/${file.file_path}`;
+      const buf   = await fetch(url).then(r => r.arrayBuffer());
+      imageBase64   = Buffer.from(buf).toString('base64');
+      imageMimeType = 'image/jpeg'; // Telegram always returns JPEG for photos
+    } catch (err) {
+      console.error('[posso] Photo download error:', (err as Error).message);
+      await input.reply(
+        '❌ Não consegui baixar a imagem. Tente novamente.',
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+  }
 
   const today     = new Date().toISOString().slice(0, 10);
   const totals    = q.getDailyTotals(today);
@@ -74,7 +109,7 @@ async function possoConversation(
     const msg = extraReinforcement
       ? `${userMessage}\n\nResposta anterior inválida. Responda APENAS com o objeto JSON de consulta especificado.`
       : userMessage;
-    return llm.chat({ systemPrompt, userContext, userMessage: msg }) as unknown;
+    return llm.chat({ systemPrompt, userContext, userMessage: msg, imageBase64, imageMimeType }) as unknown;
   }
 
   let raw: unknown;
@@ -117,9 +152,9 @@ async function possoConversation(
   await ctx.reply(reply, { parse_mode: 'HTML' });
 }
 
-export function createPossoConversation(q: Queries, llm: LLMProvider) {
+export function createPossoConversation(q: Queries, llm: LLMProvider, botToken?: string) {
   return (conversation: BotConversation, ctx: BotContext): Promise<void> =>
-    possoConversation(conversation, ctx, q, llm);
+    possoConversation(conversation, ctx, q, llm, botToken);
 }
 
 export function createPossoCommand() {

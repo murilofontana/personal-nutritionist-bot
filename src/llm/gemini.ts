@@ -21,20 +21,39 @@ export function createGeminiProvider({ apiKey, model }: { apiKey: string; model?
     systemPrompt,
     userContext,
     userMessage,
+    imageBase64,
+    imageMimeType,
   }: {
     systemPrompt: string;
     userContext: string;
     userMessage: string;
+    imageBase64?: string;
+    imageMimeType?: string;
   }): Promise<LLMResult> {
     const generativeModel = getModel(systemPrompt);
     const userContent = `${userContext}\n\nRefeição relatada: ${userMessage}`;
 
+    const buildRequest = (content: string) => {
+      if (imageBase64 && imageMimeType) {
+        return {
+          contents: [{
+            role: 'user',
+            parts: [
+              { inlineData: { mimeType: imageMimeType, data: imageBase64 } },
+              { text: content },
+            ],
+          }],
+        };
+      }
+      return content;
+    };
+
     try {
-      const result = await generativeModel.generateContent(userContent);
+      const result = await generativeModel.generateContent(buildRequest(userContent));
       return JSON.parse(stripMarkdown(result.response.text())) as LLMResult;
     } catch (_err) {
       const retry = await generativeModel.generateContent(
-        `${userContent}\n\nIMPORTANTE: Responda APENAS com o objeto JSON, sem markdown.`
+        buildRequest(`${userContent}\n\nIMPORTANTE: Responda APENAS com o objeto JSON, sem markdown.`)
       );
       return JSON.parse(stripMarkdown(retry.response.text())) as LLMResult;
     }

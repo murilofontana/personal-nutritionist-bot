@@ -54,3 +54,14 @@ export function buildUserContext(
     `- Gordura consumida:   ${Math.round(totals.fat)}g (meta: ${Math.round(profile.target_fat)}g, restam: ${Math.round(remFat)}g)`,
   ].join('\n');
 }
+
+export function buildImageContext(caption: string): string {
+  return [
+    `[IMAGEM ANEXADA] O usuário enviou uma foto. Analise a tabela nutricional ou`,
+    `o alimento visível. Use a legenda para inferir a quantidade consumida.`,
+    `Retorne também o campo "descricao" com o que foi identificado`,
+    `(ex: "3 biscoitos Crackers Integral, ~45g").`,
+    ``,
+    `Legenda do usuário: "${caption}"`,
+  ].join('\n');
+}

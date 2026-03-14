@@ -61,7 +61,7 @@ bot.use(async (ctx, next) => {
 bot.use(session<SessionData, BotContext>({ initial: () => ({} as SessionData) }));
 bot.use(conversations<BotContext, BotContext>());
 bot.use(createConversation<BotContext, BotContext>(createDietaConversation(q), 'dieta'));
-bot.use(createConversation<BotContext, BotContext>(createPossoConversation(q, llm), 'posso'));
+bot.use(createConversation<BotContext, BotContext>(createPossoConversation(q, llm, TELEGRAM_TOKEN), 'posso'));
 
 // --- Commands ---
 bot.command('dia',       createDiaCommand(q));
@@ -94,8 +94,9 @@ bot.command('start', async (ctx) => {
   );
 });
 
-// --- Meal handler (free text) ---
-bot.on('message:text', createMealHandler(q, llm));
+// --- Meal handler (free text + photos) ---
+bot.on('message:text',  createMealHandler(q, llm, TELEGRAM_TOKEN));
+bot.on('message:photo', createMealHandler(q, llm, TELEGRAM_TOKEN));
 
 // --- Error handler ---
 bot.catch((err) => {

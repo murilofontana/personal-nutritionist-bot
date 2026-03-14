@@ -24,12 +24,23 @@ export function createOpenAIProvider({ apiKey, model }: { apiKey: string; model?
     systemPrompt,
     userContext,
     userMessage,
+    imageBase64,
+    imageMimeType,
   }: {
     systemPrompt: string;
     userContext: string;
     userMessage: string;
+    imageBase64?: string;
+    imageMimeType?: string;
   }): Promise<LLMResult> {
-    const userContent = `${userContext}\n\nRefeição relatada: ${userMessage}`;
+    const textContent = `${userContext}\n\nRefeição relatada: ${userMessage}`;
+    const userContent: OpenAI.Chat.ChatCompletionContentPart[] | string = imageBase64 && imageMimeType
+      ? [
+          { type: 'image_url', image_url: { url: `data:${imageMimeType};base64,${imageBase64}` } },
+          { type: 'text', text: textContent },
+        ]
+      : textContent;
+
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userContent },

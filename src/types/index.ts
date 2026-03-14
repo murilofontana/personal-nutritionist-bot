@@ -11,6 +11,7 @@ export interface LLMResult {
   dentro_da_dieta: 'sim' | 'sim_com_ressalva' | 'nao';
   avaliacao: string;
   recomendacao: string;
+  descricao?: string;  // LLM-generated description of identified food (images only)
 }
 
 export interface PossoResponse {
@@ -25,6 +26,8 @@ export interface LLMProvider {
     systemPrompt: string;
     userContext: string;
     userMessage: string;
+    imageBase64?: string;    // raw base64, no data: prefix
+    imageMimeType?: string;  // 'image/jpeg' | 'image/png' | 'image/webp'
   }): Promise<LLMResult>;
 }
 
